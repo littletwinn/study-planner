@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Pomodoro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+  margin:0;
+  font-family:'IBM Plex Mono', monospace;
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  background:#eaf8ff; /* ฟ้าอ่อน สดใสกว่าเดิม */
+}
+
+/* ===== NAVBAR ===== */
+.navbar{
+  height:85px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:50px;
+  background:#ffffff;
+  box-shadow:0 4px 25px rgba(0,0,0,0.05);
+}
+
+.navbar a{
+  color:#43302e;
+  text-decoration:none;
+  font-size:18px;
+  font-weight:600;
+  transition:0.3s;
+}
+
+.navbar a:hover{
+  color:#fff1b5;
+}
+
+/* ===== MAIN ===== */
+.main{
+  flex:1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.timer-card{
+  background:#ffffff;
+  padding:70px 100px;
+  border-radius:30px;
+  text-align:center;
+  box-shadow:0 25px 60px rgba(0,0,0,0.07);
+  transition:0.3s;
+}
+
+h1{
+  color:#43302e;
+  font-weight:600;
+  margin-bottom:35px;
+}
+
+/* ===== TIMER ===== */
+.time{
+  font-size:110px;        /* ใหญ่ขึ้น */
+  font-weight:600;        /* หนา */
+  color:#43302e;
+  margin:25px 0 50px 0;
+  letter-spacing:3px;
+  transition:0.3s ease;
+}
+
+/* ===== BUTTONS ===== */
+button{
+  padding:14px 28px;
+  margin:8px;
+  border:none;
+  border-radius:14px;
+  cursor:pointer;
+  font-family:inherit;
+  font-size:15px;
+  font-weight:600;
+  transition:0.25s;
+}
+
+button:hover{
+  transform:translateY(-3px);
+  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+
+/* Start + Focus */
+button:nth-child(1),
+button:nth-child(4){
+  background:#fff1b5;
+  color:#43302e;
+}
+
+/* Pause + Reset */
+button:nth-child(2),
+button:nth-child(3){
+  background:#c1dbe8;
+  color:#43302e;
+}
+
+/* ===== FOCUS MODE ===== */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:#fff1b5;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:999;
+  transition:0.4s;
+}
+
+.overlay.active{
+  display:flex;
+}
+
+.focus-time{
+  font-size:220px;     /* ใหญ่เต็มจอ */
+  font-weight:600;
+  color:#43302e;
+  letter-spacing:5px;
+}
+
+.close-btn{
+  position:absolute;
+  top:30px;
+  right:40px;
+  font-size:40px;
+  background:none;
+  border:none;
+  color:#43302e;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.close-btn:hover{
+  transform:scale(1.2);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+  <a href="homep.html">HOME</a>
+  <a href="pomodoro.html">POMODORO</a>
+</div>
+
+<div class="main">
+  <div class="timer-card">
+    <h1>Pomodoro Timer</h1>
+    <div id="timer" class="time">25:00</div>
+
+    <button onclick="startTimer()">Start</button>
+    <button onclick="pauseTimer()">Pause</button>
+    <button onclick="resetTimer()">Reset</button>
+    <button onclick="openFocus()">Focus Mode</button>
+  </div>
+</div>
+
+<div id="focusOverlay" class="overlay">
+  <button class="close-btn" onclick="closeFocus()">✕</button>
+  <div id="focusTimer" class="focus-time">25:00</div>
+</div>
+
+<script>
+let minutes = 25;
+let seconds = 0;
+let timer;
+let isRunning = false;
+
+function updateDisplay(){
+  const formatted =
+    String(minutes).padStart(2,"0")+":"+
+    String(seconds).padStart(2,"0");
+
+  document.getElementById("timer").innerText = formatted;
+  document.getElementById("focusTimer").innerText = formatted;
+}
+
+function startTimer(){
+  if(isRunning) return;
+  isRunning = true;
+
+  timer = setInterval(()=>{
+    if(seconds===0){
+      if(minutes===0){
+        clearInterval(timer);
+        isRunning=false;
+        alert("Time's up!");
+        return;
+      }
+      minutes--;
+      seconds=59;
+    }else{
+      seconds--;
+    }
+    updateDisplay();
+  },1000);
+}
+
+function pauseTimer(){
+  clearInterval(timer);
+  isRunning=false;
+}
+
+function resetTimer(){
+  clearInterval(timer);
+  isRunning=false;
+  minutes=25;
+  seconds=0;
+  updateDisplay();
+}
+
+function openFocus(){
+  document.getElementById("focusOverlay").classList.add("active");
+}
+
+function closeFocus(){
+  document.getElementById("focusOverlay").classList.remove("active");
+}
+
+updateDisplay();
+</script>
+
+</body>
+</html>
