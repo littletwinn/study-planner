@@ -61,8 +61,8 @@ function resetTimer() {
 
   round = 1;
 
-  if(mode === "focus") minutes = 25;
-  else if(mode === "short") minutes = 5;
+  if (mode === "focus") minutes = 25;
+  else if (mode === "short") minutes = 5;
   else minutes = 15;
 
   seconds = 0;
@@ -70,7 +70,21 @@ function resetTimer() {
   updateDisplay();
   updateBackground();
 }
+
 function switchMode() {
+
+  // 🔥 บันทึกเวลาก่อนเปลี่ยนโหมด
+  let sessionMinutes;
+
+  if (mode === "focus") sessionMinutes = 25;
+  else if (mode === "short") sessionMinutes = 5;
+  else sessionMinutes = 15;
+
+  // เรียก Firebase addTime
+  if (window.addTime) {
+    window.addTime(sessionMinutes, mode);
+  }
+
   alarm.play();
 
   clearInterval(timer);
@@ -111,28 +125,20 @@ function changeMode(selectedMode, btn, index){
 
   mode = selectedMode;
 
-  if(mode === "focus"){
-    minutes = 25;
-  }
-  else if(mode === "short"){
-    minutes = 5;
-  }
-  else{
-    minutes = 15;
-  }
+  if(mode === "focus") minutes = 25;
+  else if(mode === "short") minutes = 5;
+  else minutes = 15;
 
   seconds = 0;
 
   updateDisplay();
   updateBackground();
 
-  // ===== SEGMENT INDICATOR =====
   const indicator = document.getElementById("segmentIndicator");
   if(indicator && index !== undefined){
     indicator.style.transform = `translateX(${index * 100}%)`;
   }
 
-  // ===== ACTIVE BUTTON =====
   document.querySelectorAll(".segment-btn").forEach(b =>
     b.classList.remove("active")
   );
@@ -151,26 +157,13 @@ function updateBackground(){
 
   let themeColor;
 
-  if (mode === "focus") {
-     themeColor = "#fce3e3";
-  } 
-  else if (mode === "short") {
-     themeColor = "#fffac4";
-  } 
-  else {
-     themeColor = "#eef7ac";
-  }
+  if (mode === "focus") themeColor = "#fce3e3";
+  else if (mode === "short") themeColor = "#fffac4";
+  else themeColor = "#eef7ac";
 
-  // 🔹 เปลี่ยนสี overlay
   if(overlay) overlay.style.backgroundColor = themeColor;
-
-  // 🔹 เปลี่ยนเงา card แทน border (เพราะไม่มี border แล้ว)
   if(card) card.style.boxShadow = `0 10px 25px ${themeColor}40`;
-
-  // 🔹 ปุ่ม focus
   if(focusBtn) focusBtn.style.backgroundColor = themeColor;
-
-  // 🔹 indicator
   if(indicator) indicator.style.backgroundColor = themeColor;
 }
 
