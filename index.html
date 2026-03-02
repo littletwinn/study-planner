@@ -1,55 +1,329 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>HomePage</title>
+<meta charset="UTF-8">
+<title>Planner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- โหลดฟอนต์ Mono -->
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pomodoro.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 
-  <style>
-    body {
-      margin: 0;
-      font-family: 'IBM Plex Mono', monospace; /* ✅ ใช้ชื่อจริง */
-      background: #fff;
-      height: 100vh;
-    }
+<style>
+body{
+  margin:0;
+  font-family:'IBM Plex Mono', monospace;
+  background:#eaf8ff;
+}
 
-    /* ===== NAVBAR เป็นรูป ===== */
-    .navbar {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 120px;
+/* ===== NAVBAR ===== */
+.navbar{
+  height:85px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:50px;
+  background:#fff;
+  box-shadow:0 4px 25px rgba(0,0,0,0.05);
+}
 
-      background-image: url("background.jpg");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-    }
+.navbar a{
+  text-decoration:none;
+  color:#43302e;
+  font-weight:600;
+}
 
-    /* ลิงก์เมนู */
-    .navbar a {
-      color: #562F00;
-      padding: 14px 25px;
-      text-decoration: none;
-      font-size: 18px;
-    
-    }
+/* ===== LAYOUT ===== */
+.planner-wrapper{
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  gap:60px;
+  padding:40px 60px;
+}
 
-    .navbar a:hover {
-      opacity: 0.7;
-    }
+.left-side,
+.right-side{
+  width:420px;
+}
 
-  </style>
+/* ===== TIMETABLE ===== */
+.timetable-title{
+  text-align:center;
+  margin-bottom:20px;
+  font-weight:600;
+  color:#43302e;
+}
+
+.mode-selector{
+  display:flex;
+  gap:12px;
+  margin-bottom:15px;
+}
+
+.mode-card{
+  flex:1;
+  padding:10px;
+  border-radius:12px;
+  text-align:center;
+  cursor:pointer;
+  font-weight:600;
+  background:#fff;
+  box-shadow:0 4px 15px rgba(0,0,0,0.05);
+  transition:0.25s;
+}
+
+.mode-card.active{
+  transform:translateY(-3px);
+}
+
+.study{ background:#ffe9e9; }
+.break{ background:#fdf89e; }
+.routine{ background:#ffffff; }
+
+.study-input{
+  display:none;
+  margin-bottom:15px;
+}
+
+.study-input input{
+  width:75%;
+  padding:6px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+.study-input button{
+  padding:6px 10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+#timetable{
+  display:grid;
+  grid-template-columns:55px repeat(4,1fr);
+  gap:0;
+}
+
+.hour-label{
+  background:#f3f3f3;
+  font-size:12px;
+  font-weight:600;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.time-slot{
+  height:26px;
+  border:1px solid #ddd;
+  background:#fff;
+  font-size:9px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+
+.time-slot.filled{
+  border:none;
+}
+
+.reset-wrapper{
+  margin-top:15px;
+  text-align:center;
+}
+
+.reset-wrapper button{
+  padding:8px 18px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+/* ===== RIGHT ===== */
+.right-side{
+  display:flex;
+  justify-content:center;
+}
+</style>
 </head>
 
 <body>
 
-  <div class="navbar">
-    <a href="index.html">HOME</a>
-    <a href="pomodoro.html">POMODORO</a>
+
+<div class="planner-wrapper">
+
+  <div class="left-side">
+
+    <h2 class="timetable-title">TIMETABLE</h2>
+
+    <!-- MODE SELECTOR -->
+    <div class="mode-selector">
+      <div class="mode-card study active" onclick="selectMode('Study','#ffd8d8',this)">Study</div>
+      <div class="mode-card break" onclick="selectMode('Break','#d9f2ff',this)">Break</div>
+      <div class="mode-card routine" onclick="selectMode('Routine','#e6ffe6',this)">Routine</div>
+    </div>
+
+    <!-- Study extra input -->
+    <div class="study-input" id="studyInputBox">
+      <input type="text" id="studyText" placeholder="เรียนอะไร...">
+      <button onclick="addStudy()">+</button>
+    </div>
+
+    <div id="timetable"></div>
+
+    <div class="reset-wrapper">
+      <button onclick="resetTable()">Reset Day</button>
+    </div>
+
   </div>
+
+  <!-- RIGHT SIDE -->
+  <div class="right-side">
+    <div class="timer-card">
+      <h1>Pomodoro Timer</h1>
+      <div id="mode">Study</div>
+      <div id="round">Round: 1</div>
+      <div id="timer" class="time">25:00</div>
+
+      <div class="toggle-container">
+        <span>Pause</span>
+        <div class="toggle-switch" onclick="toggleTimer()" id="toggleSwitch">
+          <div class="toggle-circle"></div>
+        </div>
+        <span>Start</span>
+      </div>
+
+      <button class="reset-btn" onclick="resetTimer()">Reset</button>
+      <button class="focus-btn" onclick="openFocus()">Focus Mode</button>
+
+      <div class="segment-container">
+        <div class="segment-indicator" id="segmentIndicator"></div>
+
+        <button class="segment-btn active"
+          onclick="changeMode('focus', this, 0)">Study</button>
+
+        <button class="segment-btn"
+          onclick="changeMode('short', this, 1)">Short</button>
+
+        <button class="segment-btn"
+          onclick="changeMode('long', this, 2)">Long</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="focusOverlay" class="overlay">
+  <button class="close-btn" onclick="closeFocus()">✕</button>
+  <div id="modeFocus">Study</div>
+  <div id="roundFocus">Round: 1</div>
+  <div id="focusTimer" class="focus-time">25:00</div>
+</div>
+
+<script src="script.js"></script>
+
+<script>
+const timetable = document.getElementById("timetable");
+let isDragging=false;
+let selectedSlots=[];
+let currentMode="Study";
+let currentColor="#ffd8d8";
+let studyList=[];
+
+/* CREATE TABLE */
+for(let hour=7; hour<=24; hour++){
+  const label=document.createElement("div");
+  label.className="hour-label";
+  label.innerText=`${hour}:00`;
+  timetable.appendChild(label);
+
+  for(let i=0;i<4;i++){
+    const slot=document.createElement("div");
+    slot.className="time-slot";
+    slot.addEventListener("mousedown",startSelect);
+    slot.addEventListener("mouseover",dragSelect);
+    timetable.appendChild(slot);
+  }
+}
+
+document.addEventListener("mouseup",stopSelect);
+
+function startSelect(e){
+  isDragging=true;
+  selectedSlots=[];
+  selectSlot(e.target);
+}
+
+function dragSelect(e){
+  if(isDragging) selectSlot(e.target);
+}
+
+function stopSelect(){
+  if(!isDragging) return;
+  applySelection();
+  isDragging=false;
+}
+
+function selectSlot(slot){
+  if(!selectedSlots.includes(slot)){
+    selectedSlots.push(slot);
+  }
+}
+
+function applySelection(){
+  if(selectedSlots.length===0) return;
+
+  const firstSlot=selectedSlots[0];
+
+  selectedSlots.forEach(slot=>{
+    slot.style.backgroundColor=currentColor;
+    slot.classList.add("filled");
+    slot.innerText="";
+  });
+
+  if(currentMode==="Study" && studyList.length>0){
+    firstSlot.innerText=studyList.join(", ");
+  }else{
+    firstSlot.innerText=currentMode;
+  }
+}
+
+/* MODE */
+function selectMode(mode,color,element){
+  currentMode=mode;
+  currentColor=color;
+
+  document.querySelectorAll(".mode-card")
+    .forEach(card=>card.classList.remove("active"));
+
+  element.classList.add("active");
+
+  document.getElementById("studyInputBox").style.display =
+    mode==="Study" ? "block" : "none";
+}
+
+/* ADD STUDY */
+function addStudy(){
+  const text=document.getElementById("studyText").value.trim();
+  if(text){
+    studyList.push(text);
+    document.getElementById("studyText").value="";
+  }
+}
+
+/* RESET */
+function resetTable(){
+  document.querySelectorAll(".time-slot").forEach(slot=>{
+    slot.style.backgroundColor="";
+    slot.innerText="";
+    slot.classList.remove("filled");
+  });
+  studyList=[];
+}
+</script>
 
 </body>
 </html>

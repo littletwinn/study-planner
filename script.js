@@ -1,4 +1,4 @@
-const alarm = new Audio("sound.mp3");
+const alarm = new Audio("sound.ogg");
 
 let minutes = 25;
 let seconds = 0;
