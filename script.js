@@ -1,6 +1,8 @@
 const alarm = new Audio("sound.ogg");
 
-let minutes = 25;
+let elapsedSeconds = 0;
+
+let minutes = 50;   // 🔥 focus เริ่มต้น 50
 let seconds = 0;
 let timer;
 let isRunning = false;
@@ -35,6 +37,21 @@ function startTimer() {
   isRunning = true;
 
   timer = setInterval(() => {
+
+    elapsedSeconds++;
+
+    if (elapsedSeconds === 60) {
+      elapsedSeconds = 0;
+
+      if (window.addTime) {
+        if (mode === "focus") {
+          window.addTime(1, "focus");
+        } else {
+          window.addTime(1, "break");
+        }
+      }
+    }
+
     if (seconds === 0) {
       if (minutes === 0) {
         switchMode();
@@ -47,6 +64,7 @@ function startTimer() {
     }
 
     updateDisplay();
+
   }, 1000);
 }
 
@@ -58,12 +76,13 @@ function pauseTimer() {
 function resetTimer() {
   clearInterval(timer);
   isRunning = false;
+  elapsedSeconds = 0;
 
   round = 1;
 
-  if (mode === "focus") minutes = 25;
-  else if (mode === "short") minutes = 5;
-  else minutes = 15;
+  if (mode === "focus") minutes = 50;
+  else if (mode === "short") minutes = 10;
+  else minutes = 25;
 
   seconds = 0;
 
@@ -73,14 +92,12 @@ function resetTimer() {
 
 function switchMode() {
 
-  // 🔥 บันทึกเวลาก่อนเปลี่ยนโหมด
   let sessionMinutes;
 
-  if (mode === "focus") sessionMinutes = 25;
-  else if (mode === "short") sessionMinutes = 5;
-  else sessionMinutes = 15;
+  if (mode === "focus") sessionMinutes = 50;
+  else if (mode === "short") sessionMinutes = 10;
+  else sessionMinutes = 25;
 
-  // เรียก Firebase addTime
   if (window.addTime) {
     window.addTime(sessionMinutes, mode);
   }
@@ -93,15 +110,15 @@ function switchMode() {
   if (mode === "focus") {
     if (round % 4 === 0) {
       mode = "long";
-      minutes = 15;
+      minutes = 25;
     } else {
       mode = "short";
-      minutes = 5;
+      minutes = 10;
     }
   } else {
     mode = "focus";
     round++;
-    minutes = 25;
+    minutes = 50;
   }
 
   seconds = 0;
@@ -125,9 +142,9 @@ function changeMode(selectedMode, btn, index){
 
   mode = selectedMode;
 
-  if(mode === "focus") minutes = 25;
-  else if(mode === "short") minutes = 5;
-  else minutes = 15;
+  if(mode === "focus") minutes = 50;
+  else if(mode === "short") minutes = 10;
+  else minutes = 25;
 
   seconds = 0;
 
@@ -167,18 +184,17 @@ function updateBackground(){
   if(indicator) indicator.style.backgroundColor = themeColor;
 }
 
-function toggleTimer(){
-  const toggle = document.getElementById("toggleSwitch");
+function toggleTimer() {
+  const btn = document.querySelector(".spotify-btn .icon");
 
-  if(isRunning){
+  if (isRunning) {
     pauseTimer();
-    if(toggle) toggle.classList.remove("active");
-  }else{
+    btn.innerText = "▶";
+  } else {
     startTimer();
-    if(toggle) toggle.classList.add("active");
+    btn.innerText = "❚❚";
   }
 }
 
-// เรียกครั้งแรก
 updateDisplay();
 updateBackground();

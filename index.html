@@ -2,327 +2,229 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>Planner</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pomodoro</title>
 
-<link rel="stylesheet" href="pomodoro.css">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'IBM Plex Mono',monospace;}
+
 body{
-  margin:0;
-  font-family:'IBM Plex Mono', monospace;
-  background:#eaf8ff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    background:#eaf8ff;
 }
 
-/* ===== NAVBAR ===== */
-.navbar{
-  height:85px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:50px;
-  background:#fff;
-  box-shadow:0 4px 25px rgba(0,0,0,0.05);
+/* CARD */
+.timer-card{
+    background:#fff;
+    padding:clamp(20px,4vw,35px);
+    border-radius:18px;
+    text-align:center;
+    box-shadow:0 10px 25px rgba(0,0,0,0.05);
+    width:100%;
+    max-width:380px;
 }
 
-.navbar a{
-  text-decoration:none;
-  color:#43302e;
-  font-weight:600;
+/* TEXT */
+h1{font-size:clamp(18px,4vw,26px);margin-bottom:10px;color:#43302e;}
+#mode{font-size:14px;margin-bottom:4px;}
+#round{font-size:12px;margin-bottom:15px;opacity:.7;}
+
+.time{font-size:clamp(40px,10vw,70px);font-weight:600;margin:20px 0;}
+
+/* BUTTON */
+button{
+    padding:10px 14px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:clamp(12px,2.5vw,14px);
+    margin:5px;
 }
 
-/* ===== LAYOUT ===== */
-.planner-wrapper{
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  gap:60px;
-  padding:40px 60px;
+.spotify-btn{
+    width:clamp(60px,15vw,80px);
+    height:clamp(60px,15vw,80px);
+    border-radius:50%;
+    background:#eaf8ff;
 }
 
-.left-side,
-.right-side{
-  width:420px;
+/* SEGMENT */
+.segment-container{
+    display:flex;
+    margin-top:15px;
+    background:#f3f3f3;
+    border-radius:14px;
+    padding:4px;
 }
 
-/* ===== TIMETABLE ===== */
-.timetable-title{
-  text-align:center;
-  margin-bottom:20px;
-  font-weight:600;
-  color:#43302e;
+.segment-container button{
+    flex:1;
+    background:transparent;
 }
 
-.mode-selector{
-  display:flex;
-  gap:12px;
-  margin-bottom:15px;
+.active{background:#ffd8d8;border-radius:10px;}
+
+/* SUMMARY */
+.daily-summary{
+    margin-top:20px;
+    font-size:13px;
 }
 
-.mode-card{
-  flex:1;
-  padding:10px;
-  border-radius:12px;
-  text-align:center;
-  cursor:pointer;
-  font-weight:600;
-  background:#fff;
-  box-shadow:0 4px 15px rgba(0,0,0,0.05);
-  transition:0.25s;
-}
+/* MOBILE (สำคัญสำหรับ Notion) */
+@media(max-width:500px){
+    body{
+        transform:scale(0.92);
+        transform-origin:top center;
+    }
 
-.mode-card.active{
-  transform:translateY(-3px);
-}
-
-.study{ background:#ffe9e9; }
-.break{ background:#fdf89e; }
-.routine{ background:#ffffff; }
-
-.study-input{
-  display:none;
-  margin-bottom:15px;
-}
-
-.study-input input{
-  width:75%;
-  padding:6px;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-
-.study-input button{
-  padding:6px 10px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-#timetable{
-  display:grid;
-  grid-template-columns:55px repeat(4,1fr);
-  gap:0;
-}
-
-.hour-label{
-  background:#f3f3f3;
-  font-size:12px;
-  font-weight:600;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.time-slot{
-  height:26px;
-  border:1px solid #ddd;
-  background:#fff;
-  font-size:9px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-}
-
-.time-slot.filled{
-  border:none;
-}
-
-.reset-wrapper{
-  margin-top:15px;
-  text-align:center;
-}
-
-.reset-wrapper button{
-  padding:8px 18px;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:600;
-}
-
-/* ===== RIGHT ===== */
-.right-side{
-  display:flex;
-  justify-content:center;
+    button{width:100%;}
 }
 </style>
 </head>
 
 <body>
 
+<div class="timer-card">
+    <h1>🍅 Pomodoro</h1>
+    <div id="mode">Study</div>
+    <div id="round">Round: 1</div>
+    <div id="timer" class="time">25:00</div>
 
-<div class="planner-wrapper">
+    <button class="spotify-btn" onclick="toggleTimer()" id="playBtn">▶</button>
 
-  <div class="left-side">
+    <button onclick="resetTimer()">Reset</button>
 
-    <h2 class="timetable-title">TIMETABLE</h2>
-
-    <!-- MODE SELECTOR -->
-    <div class="mode-selector">
-      <div class="mode-card study active" onclick="selectMode('Study','#ffd8d8',this)">Study</div>
-      <div class="mode-card break" onclick="selectMode('Break','#d9f2ff',this)">Break</div>
-      <div class="mode-card routine" onclick="selectMode('Routine','#e6ffe6',this)">Routine</div>
+    <div class="segment-container">
+        <button class="active" onclick="changeMode('focus',this)">Study</button>
+        <button onclick="changeMode('short',this)">Short</button>
+        <button onclick="changeMode('long',this)">Long</button>
     </div>
 
-    <!-- Study extra input -->
-    <div class="study-input" id="studyInputBox">
-      <input type="text" id="studyText" placeholder="เรียนอะไร...">
-      <button onclick="addStudy()">+</button>
+    <div class="daily-summary">
+        <p>Study: <span id="study">0</span> min</p>
+        <p>Break: <span id="break">0</span> min</p>
     </div>
-
-    <div id="timetable"></div>
-
-    <div class="reset-wrapper">
-      <button onclick="resetTable()">Reset Day</button>
-    </div>
-
-  </div>
-
-  <!-- RIGHT SIDE -->
-  <div class="right-side">
-    <div class="timer-card">
-      <h1>Pomodoro Timer</h1>
-      <div id="mode">Study</div>
-      <div id="round">Round: 1</div>
-      <div id="timer" class="time">25:00</div>
-
-      <div class="toggle-container">
-        <span>Pause</span>
-        <div class="toggle-switch" onclick="toggleTimer()" id="toggleSwitch">
-          <div class="toggle-circle"></div>
-        </div>
-        <span>Start</span>
-      </div>
-
-      <button class="reset-btn" onclick="resetTimer()">Reset</button>
-      <button class="focus-btn" onclick="openFocus()">Focus Mode</button>
-
-      <div class="segment-container">
-        <div class="segment-indicator" id="segmentIndicator"></div>
-
-        <button class="segment-btn active"
-          onclick="changeMode('focus', this, 0)">Study</button>
-
-        <button class="segment-btn"
-          onclick="changeMode('short', this, 1)">Short</button>
-
-        <button class="segment-btn"
-          onclick="changeMode('long', this, 2)">Long</button>
-      </div>
-    </div>
-  </div>
-
 </div>
 
-<div id="focusOverlay" class="overlay">
-  <button class="close-btn" onclick="closeFocus()">✕</button>
-  <div id="modeFocus">Study</div>
-  <div id="roundFocus">Round: 1</div>
-  <div id="focusTimer" class="focus-time">25:00</div>
-</div>
+<script type="module">
 
-<script src="script.js"></script>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } 
+from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
-<script>
-const timetable = document.getElementById("timetable");
-let isDragging=false;
-let selectedSlots=[];
-let currentMode="Study";
-let currentColor="#ffd8d8";
-let studyList=[];
+const firebaseConfig = {
+apiKey: "AIzaSyDoFRKAZpexROf_an_QYxgJFQV8_9kQ-aM",
+authDomain: "study-planner-5d50e.firebaseapp.com",
+projectId: "study-planner-5d50e",
+storageBucket: "study-planner-5d50e.firebasestorage.app",
+messagingSenderId: "347624011010",
+appId: "1:347624011010:web:a92370eedbce4669d6fe1b"
+};
 
-/* CREATE TABLE */
-for(let hour=7; hour<=24; hour++){
-  const label=document.createElement("div");
-  label.className="hour-label";
-  label.innerText=`${hour}:00`;
-  timetable.appendChild(label);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  for(let i=0;i<4;i++){
-    const slot=document.createElement("div");
-    slot.className="time-slot";
-    slot.addEventListener("mousedown",startSelect);
-    slot.addEventListener("mouseover",dragSelect);
-    timetable.appendChild(slot);
-  }
+let time=25*60;
+let interval=null;
+let mode="focus";
+
+function updateDisplay(){
+    let m=Math.floor(time/60);
+    let s=time%60;
+    document.getElementById("timer").innerText=
+    `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
 }
 
-document.addEventListener("mouseup",stopSelect);
-
-function startSelect(e){
-  isDragging=true;
-  selectedSlots=[];
-  selectSlot(e.target);
+function toggleTimer(){
+    if(interval){
+        clearInterval(interval);
+        interval=null;
+        document.getElementById("playBtn").innerText="▶";
+    }else{
+        interval=setInterval(run,1000);
+        document.getElementById("playBtn").innerText="⏸";
+    }
 }
 
-function dragSelect(e){
-  if(isDragging) selectSlot(e.target);
+function run(){
+    if(time>0){
+        time--;
+        updateDisplay();
+    }else{
+        clearInterval(interval);
+        interval=null;
+        addTime();
+    }
 }
 
-function stopSelect(){
-  if(!isDragging) return;
-  applySelection();
-  isDragging=false;
+function resetTimer(){
+    clearInterval(interval);
+    interval=null;
+    time=getDefaultTime();
+    updateDisplay();
 }
 
-function selectSlot(slot){
-  if(!selectedSlots.includes(slot)){
-    selectedSlots.push(slot);
-  }
+function changeMode(m,el){
+    mode=m;
+    document.querySelectorAll(".segment-container button")
+    .forEach(b=>b.classList.remove("active"));
+    el.classList.add("active");
+
+    time=getDefaultTime();
+    updateDisplay();
 }
 
-function applySelection(){
-  if(selectedSlots.length===0) return;
-
-  const firstSlot=selectedSlots[0];
-
-  selectedSlots.forEach(slot=>{
-    slot.style.backgroundColor=currentColor;
-    slot.classList.add("filled");
-    slot.innerText="";
-  });
-
-  if(currentMode==="Study" && studyList.length>0){
-    firstSlot.innerText=studyList.join(", ");
-  }else{
-    firstSlot.innerText=currentMode;
-  }
+function getDefaultTime(){
+    if(mode==="focus") return 25*60;
+    if(mode==="short") return 5*60;
+    return 15*60;
 }
 
-/* MODE */
-function selectMode(mode,color,element){
-  currentMode=mode;
-  currentColor=color;
+/* FIREBASE */
+async function addTime(){
+    let minutes=getDefaultTime()/60;
 
-  document.querySelectorAll(".mode-card")
-    .forEach(card=>card.classList.remove("active"));
+    const today=new Date().toISOString().split("T")[0];
+    const ref=doc(db,"dailySummary",today);
 
-  element.classList.add("active");
+    const snap=await getDoc(ref);
 
-  document.getElementById("studyInputBox").style.display =
-    mode==="Study" ? "block" : "none";
+    if(!snap.exists()){
+        await setDoc(ref,{
+            study: mode==="focus"?minutes:0,
+            break: mode!=="focus"?minutes:0
+        });
+    }else{
+        if(mode==="focus"){
+            await updateDoc(ref,{study:increment(minutes)});
+        }else{
+            await updateDoc(ref,{break:increment(minutes)});
+        }
+    }
+
+    loadToday();
 }
 
-/* ADD STUDY */
-function addStudy(){
-  const text=document.getElementById("studyText").value.trim();
-  if(text){
-    studyList.push(text);
-    document.getElementById("studyText").value="";
-  }
+async function loadToday(){
+    const today=new Date().toISOString().split("T")[0];
+    const ref=doc(db,"dailySummary",today);
+    const snap=await getDoc(ref);
+
+    if(snap.exists()){
+        let d=snap.data();
+        document.getElementById("study").innerText=d.study||0;
+        document.getElementById("break").innerText=d.break||0;
+    }
 }
 
-/* RESET */
-function resetTable(){
-  document.querySelectorAll(".time-slot").forEach(slot=>{
-    slot.style.backgroundColor="";
-    slot.innerText="";
-    slot.classList.remove("filled");
-  });
-  studyList=[];
-}
+updateDisplay();
+loadToday();
+
 </script>
 
 </body>
